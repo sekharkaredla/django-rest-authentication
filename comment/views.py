@@ -1,6 +1,8 @@
 # Create your views here.
 
 # curl -d '{"key1":"value1", "key2":"value2"}' -H "Content-Type: application/json" -X POST http://localhost:3000/data
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -10,7 +12,8 @@ from rest_framework.views import APIView
 from comment.models import Comment
 from comment.serializers import CommentSerializer
 
-class commentGetAPI(APIView):
+
+class commentGetAPI(LoginRequiredMixin,APIView):
     def get(self,request,comment_id):
         comment_object = get_object_or_404(Comment,pk=comment_id)
         serialized_comment_object = CommentSerializer(comment_object)
@@ -22,9 +25,17 @@ class commentGetAPI(APIView):
             return HttpResponse(status=status.HTTP_401_UNAUTHORIZED)
         commentInstance.delete()
 
+    def patch(self, request, comment_id):
+        commentInstance = get_object_or_404(Comment, pk=comment_id)
+        if commentInstance.by_user != request.user:
+            return HttpResponse(status=status.HTTP_401_UNAUTHORIZED)
+        commentInstance.content = request.data.get('content')
+        commentInstance.save()
+        return HttpResponse(status=status.HTTP_202_ACCEPTED)
 
 
-class commentCreateAPI(APIView):
+
+class commentCreateAPI(LoginRequiredMixin,APIView):
     def post(self,request):
         commentSerializer = CommentSerializer(data = request.data)
         if(commentSerializer.is_valid()):
@@ -34,14 +45,14 @@ class commentCreateAPI(APIView):
         else:
             return HttpResponse(status=status.HTTP_400_BAD_REQUEST)
 
-class commentUpdateAPI(APIView):
-    def patch(self,request,comment_id):
-        commentInstance = get_object_or_404(Comment,pk=comment_id)
-        if commentInstance.by_user != request.user:
-            return HttpResponse(status=status.HTTP_401_UNAUTHORIZED)
-        commentInstance.content = request.data.get('content')
-        commentInstance.save()
-        return HttpResponse(status=status.HTTP_202_ACCEPTED)
+
+class getAllCommentsAPI(LoginRequiredMixin,APIView):
+    def get(self,request):
+        comment_objects = Comment.objects.all()
+        print(list(comment_objects)) # to convert queryset to list of objects, queryset is lazy, it has to be iterred thorugh so as to get the objects which can serialized
+        serialized_comment_objects = CommentSerializer(comment_objects, many=True)
+        return Response(serialized_comment_objects.data)
+
 
 
 
