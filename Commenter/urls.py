@@ -20,6 +20,7 @@ from django.urls import path
 
 urlpatterns = [
     path(r'', include('comment.urls')),
+    path(r'',include('issue.urls')),
     url(r'^admin/', admin.site.urls),
     path(r'login/', auth_views.LoginView.as_view(), name = "login"),
     path(r'logout/', auth_views.LogoutView.as_view(), name = "logout"),

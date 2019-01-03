@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'comment',
-    'social_django'
+    'social_django',
+    'issue'
 ]
 
 AUTHENTICATION_BACKENDS = (
@@ -118,7 +119,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LOGIN_URL = 'login'
 LOGOUT_URL = 'logout'
-LOGIN_REDIRECT_URL = '/api/comment/all'
+LOGIN_REDIRECT_URL = 'get_all_comment_objects'
 
 SOCIAL_AUTH_GITHUB_KEY = config('SOCIAL_AUTH_GITHUB_KEY')
 SOCIAL_AUTH_GITHUB_SECRET = config('SOCIAL_AUTH_GITHUB_SECRET')
